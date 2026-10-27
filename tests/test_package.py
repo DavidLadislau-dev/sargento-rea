@@ -112,6 +112,7 @@ class SkillTests(unittest.TestCase):
         for needle in (
             "~/.claude/sargento.local.md",
             "<project>/.claude/sargento.local.md",
+            "git rev-parse --is-inside-work-tree",
             "git ls-files --error-unmatch .claude/sargento.local.md",
             "Reply in the user's language; files in this repo stay English.",
         ):
