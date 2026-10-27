@@ -1,0 +1,19 @@
+{
+  "name": "sargento-rea",
+  "version": "0.1.0",
+  "description": "A chief-of-staff Claude that commands a squad of Claude Code agents to study, reverse-engineer and build software, with a library of contributed reverse-engineering recipes.",
+  "author": {
+    "name": "David Ladislau",
+    "url": "https://github.com/DavidLadislau-dev"
+  },
+  "homepage": "https://github.com/DavidLadislau-dev/sargento-rea",
+  "repository": "https://github.com/DavidLadislau-dev/sargento-rea",
+  "license": "MIT",
+  "keywords": [
+    "reverse-engineering",
+    "clean-room",
+    "multi-agent",
+    "herdr",
+    "recipes"
+  ]
+}

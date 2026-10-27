@@ -1,0 +1,21 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "sargento-rea",
+  "description": "A chief-of-staff Claude that commands a squad of Claude Code agents to study, reverse-engineer and build software, with a library of contributed reverse-engineering recipes.",
+  "owner": {
+    "name": "David Ladislau"
+  },
+  "plugins": [
+    {
+      "name": "sargento-rea",
+      "description": "A chief-of-staff Claude that commands a squad of Claude Code agents to study, reverse-engineer and build software, with a library of contributed reverse-engineering recipes.",
+      "version": "0.1.0",
+      "author": {
+        "name": "David Ladislau",
+        "url": "https://github.com/DavidLadislau-dev"
+      },
+      "source": "./",
+      "category": "development"
+    }
+  ]
+}
