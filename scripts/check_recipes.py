@@ -35,15 +35,31 @@ SCAN_GLOBS = ("skills/**/*.md", ".claude-plugin/*.json")
 README_LINK_RE = re.compile(
     r"\(\.?/?skills/sargento-rea/recipes/([a-z0-9-]+)\.md(?:#[^)]*)?\)"
 )
+# owner/repo of a github.com link; whatever follows (/blob/..., /pull/N,
+# /issues/N) is ignored. The lookbehind keeps gist.github.com and the like out.
+GITHUB_REPO_RE = re.compile(
+    r"(?<![\w.-])(?:https?://)?(?:www\.)?github\.com/([A-Za-z0-9-]+)/([A-Za-z0-9._-]+)"
+)
+SOURCES_HEADING = "## Sources and credits"
 
+# A pipe into `sudo`, with any flags, before the program that runs the download.
+_SUDO = r"(sudo\b[^\n|]*?\s)?"
 SUSPICIOUS = (
     (re.compile(r"[\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u2069\ufeff]"),
      "invisible or bidirectional control character"),
-    (re.compile(r"\b(curl|wget)\b[^\n|]*\|\s*(sudo\s+)?(ba|z)?sh\b"),
+    (re.compile(r"\b(curl|wget)\b[^\n|]*\|\s*" + _SUDO + r"(ba|z)?sh\b"),
      "download piped into a shell"),
+    (re.compile(r"\b(curl|wget)\b[^\n|]*\|\s*" + _SUDO + r"(python[0-9.]*|perl|ruby|node)\b"),
+     "download piped into an interpreter"),
+    (re.compile(r"[<$]\(\s*(curl|wget)\b"),
+     "download inside process or command substitution"),
     (re.compile(r"\biex\b\s*\(?\s*(irm|iwr|invoke-restmethod|invoke-webrequest)\b",
                 re.IGNORECASE),
      "PowerShell download-and-execute"),
+    (re.compile(r"\b(irm|iwr|invoke-restmethod|invoke-webrequest)\b[^\n]*\|\s*iex\b",
+                re.IGNORECASE),
+     "PowerShell download piped into iex"),
+    (re.compile(r"\binvoke-expression\b", re.IGNORECASE), "Invoke-Expression call"),
     (re.compile(r"\bDownload(String|File|Data)\b"), "Download* call"),
     (re.compile(r"\bFromBase64String\b"), "FromBase64String call"),
     (re.compile(r"[A-Za-z0-9+/]{120,}={0,2}"), "long base64-like blob"),
@@ -146,6 +162,33 @@ def _headings(body: str) -> list[str]:
     return found
 
 
+def _section(body: str, heading: str) -> str:
+    """Text under `heading` (a '## ' line outside code fences), up to the next one."""
+    out: list[str] = []
+    inside = in_fence = False
+    for line in body.split("\n"):
+        if line.startswith("```") or line.startswith("~~~"):
+            in_fence = not in_fence
+        elif not in_fence and line.startswith("## "):
+            inside = line.rstrip() == heading
+            continue
+        if inside:
+            out.append(line)
+    return "\n".join(out)
+
+
+def github_repos(text: str) -> dict[str, str]:
+    """Map lower-cased 'owner/repo' to its first spelling, for every github.com link."""
+    found: dict[str, str] = {}
+    for owner, repo in GITHUB_REPO_RE.findall(text):
+        repo = repo.rstrip(".")
+        if repo.endswith(".git"):
+            repo = repo[:-4]
+        if repo:
+            found.setdefault(f"{owner}/{repo}".lower(), f"{owner}/{repo}")
+    return found
+
+
 def check_recipe(path: Path, text: str) -> list[Finding]:
     name = path.as_posix()
     out: list[Finding] = []
@@ -169,16 +212,19 @@ def check_recipe(path: Path, text: str) -> list[Finding]:
             err(f"'{key}' must be a list")
     if isinstance(data.get("authors"), list) and not data["authors"]:
         err("'authors' must not be empty")
+    credited: set[str] | None = None
     if "learned_from" in data:
         lf = data["learned_from"]
         if not isinstance(lf, list) or not all(isinstance(i, dict) for i in lf):
             err("'learned_from' must be a list of name/url entries")
         else:
+            credited = set()
             for i, item in enumerate(lf, 1):
                 if not item.get("name"):
                     err(f"learned_from entry {i} is missing 'name'")
                 if not item.get("url", "").startswith("https://"):
                     err(f"learned_from entry {i} needs an https:// 'url'")
+                credited.update(github_repos(item.get("url", "")))
     if isinstance(data.get("id"), str) and data["id"] and data["id"] != path.stem:
         err(f"'id' ({data['id']}) must equal the file name ({path.stem})")
     if isinstance(data.get("mission"), str) and data["mission"] \
@@ -200,6 +246,13 @@ def check_recipe(path: Path, text: str) -> list[Finding]:
             positions.append(headings.index(heading))
     if positions != sorted(positions):
         err("required headings are out of order")
+
+    if credited is not None and SOURCES_HEADING in headings:
+        cited = github_repos(_section(body, SOURCES_HEADING))
+        for key, repo in cited.items():
+            if key not in credited:
+                err(f"'{SOURCES_HEADING}' cites github.com/{repo}, "
+                    "which no 'learned_from' url credits")
     return out
 
 
@@ -222,6 +275,28 @@ def _read(path: Path) -> tuple[str | None, Finding | None]:
     except UnicodeDecodeError as exc:
         return None, Finding(path.as_posix(), "error", f"not valid UTF-8: {exc}")
     return text.replace("\r\n", "\n"), None
+
+
+def scan_file(name: str) -> list[Finding]:
+    """`--scan` one file. Bad UTF-8 is replaced and reported per line, so one
+    bad byte cannot hide the rest of the file; an unreadable file is an error."""
+    try:
+        data = Path(name).read_bytes()
+    except OSError as exc:
+        return [Finding(name, "error", f"could not read: {exc.strerror or exc}")]
+    if data.startswith(b"\xef\xbb\xbf"):
+        data = data[3:]
+    out: list[Finding] = []
+    lines: list[str] = []
+    # 0x0A never occurs inside a multi-byte UTF-8 sequence, so splitting the
+    # bytes first keeps the line numbers of scan_suspicious.
+    for lineno, raw in enumerate(data.split(b"\n"), 1):
+        try:
+            lines.append(raw.decode("utf-8"))
+        except UnicodeDecodeError:
+            lines.append(raw.decode("utf-8", errors="replace"))
+            out.append(Finding(name, "warning", f"line {lineno}: invalid UTF-8 bytes"))
+    return out + scan_suspicious(name, "\n".join(lines))
 
 
 def check_repo(root: Path) -> list[Finding]:
@@ -280,20 +355,22 @@ def _print(findings: list[Finding]) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # A Windows console or a pipe may use a narrow code page; escape what it
+    # cannot encode instead of crashing on a recipe's or a diff's characters.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(errors="backslashreplace")
     parser = argparse.ArgumentParser(description="Check the Sargento REA recipe library.")
     parser.add_argument("--root", default=".", help="repository root (default: .)")
     parser.add_argument("--scan", nargs="+", metavar="FILE",
-                        help="scan arbitrary files for suspicious content (warnings only)")
+                        help="scan arbitrary files for suspicious content (warnings; an "
+                             "unreadable file is an error)")
     args = parser.parse_args(argv)
 
     findings: list[Finding] = []
     if args.scan:
         for name in args.scan:
-            text, problem = _read(Path(name))
-            if problem:
-                findings.append(problem)
-            else:
-                findings.extend(scan_suspicious(name, text))
+            findings.extend(scan_file(name))
     else:
         findings = check_repo(Path(args.root))
     _print(findings)
