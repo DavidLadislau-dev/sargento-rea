@@ -6,3 +6,4 @@
 |---|---|---|
 | [Rosetta stone pairs](skills/sargento-rea/recipes/rosetta-stone.md) | Learn an undocumented file format by pairing each sample with the vendor's own interpretation of the same document, then counting field matches across every pair. | storytold (indd-utils, photocraft, photocraft-corpus, wordcraft) |
 | [Evidence ledger](skills/sargento-rea/recipes/evidence-ledger.md) | Keep every fact about a target with a match count and every open question with a status, so your code relies only on facts you can re-check. | storytold (indd-utils) |
+| [Pinned corpus](skills/sargento-rea/recipes/pinned-corpus.md) | Keep samples out of git, pin each batch by commit and SHA-256, record where each batch came from, and leave private samples out of published numbers. | storytold (photocraft, indd-utils, photocraft-corpus) |
