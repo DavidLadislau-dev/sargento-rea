@@ -8,10 +8,10 @@ Each recipe is one method in one file, signed by its authors and credited to the
 
 | Recipe | What it gets you | Learned from |
 |---|---|---|
-| [Rosetta stone pairs](skills/sargento-rea/recipes/rosetta-stone.md) | Learn an undocumented file format by pairing each sample with the vendor's own interpretation of the same document, then counting field matches across every pair. | storytold (indd-utils, photocraft, photocraft-corpus, wordcraft) |
+| [Rosetta stone pairs](skills/sargento-rea/recipes/rosetta-stone.md) | Learn an undocumented file format by pairing each sample with the vendor's own interpretation of the same document, then counting field matches across every pair. | storytold (indd-utils, photocraft, photocraft-corpus, wordcraft, lightcraft) |
 | [Evidence ledger](skills/sargento-rea/recipes/evidence-ledger.md) | Keep every fact about a target with a match count and every open question with a status, so your code relies only on facts you can re-check. | storytold (indd-utils) |
-| [Pinned corpus](skills/sargento-rea/recipes/pinned-corpus.md) | Keep samples out of git, pin each batch by commit and SHA-256, record where each batch came from, and leave private samples out of published numbers. | storytold (photocraft, indd-utils, photocraft-corpus) |
-| [Black-box app observation](skills/sargento-rea/recipes/black-box-app.md) | Learn how an installed app behaves by feeding it synthetic inputs and recording what it shows and writes, using only its screen, its exports and its scripting interface. | storytold (photocraft-corpus, wordcraft, cadcraft, soundcraft, pdfcraft) |
+| [Pinned corpus](skills/sargento-rea/recipes/pinned-corpus.md) | Keep samples out of git, pin each batch by commit and SHA-256, record where each batch came from, and leave private samples out of published numbers. | storytold (photocraft, indd-utils, photocraft-corpus, wordcraft) |
+| [Black-box app observation](skills/sargento-rea/recipes/black-box-app.md) | Learn how an installed app behaves by feeding it synthetic inputs and recording what it shows and writes, using only its screen, its exports and its scripting interface. | storytold (photocraft-corpus, photocraft, wordcraft, cadcraft, soundcraft, pdfcraft) |
 | [Licence firewall](skills/sargento-rea/recipes/licence-firewall.md) | Sort every outside source by licence before work starts, so copyleft code is never copied or linked, permissive references are re-described with attribution, and copyleft tools only run as separate processes. | storytold (cadcraft, pdfcraft, photocraft, wordcraft, soundcraft) |
 | [Rising floors](skills/sargento-rea/recipes/rising-floors.md) | Make every measurement print its scores, enforce a pass floor that only goes up, fail instead of skip when a reference tool is missing, and accept a parity claim only when a real test backs it. | storytold (pdfcraft, photocraft, photocraft-corpus, wordcraft) |
 | [Call-site contract](skills/sargento-rea/recipes/call-site-contract.md) | Infer what a library function takes and returns from how real programs call it, record what the callers cannot settle, and write the code from that contract instead of translating the disassembly. | AnyPS5 |
@@ -53,7 +53,7 @@ Open Claude Code and talk to the Sargento:
 - `sargento, build <idea>` starts a Build mission: survey the market, write a spec, then build with a squad.
 - `sargento, review PR 12` briefs you on a pull request to this repository.
 
-The Sargento reads your overlay, picks an engine, tells you which one it chose, and asks you to confirm the plan before it enlists recruits.
+The Sargento reads your overlay, picks an engine and tells you which one it chose. Research recruits (recon in a Study, the survey in a Build) start right after the briefing. The Sargento asks you to approve the recipe plan or the spec before any recruit writes code or runs a recipe.
 
 ## How it works
 
@@ -72,9 +72,9 @@ Your personal rules live outside this repository, in a private overlay file:
 - `~/.claude/sargento.local.md` applies to everything you do.
 - `<project>/.claude/sargento.local.md` applies to one project and wins over the first.
 
-Start from `skills/sargento-rea/templates/sargento.local.example.md`. It has sections for your rules, machine, tools, workflow, stack and mission notes, so you can set your own limits, authorization rules and squad size. `.gitignore` covers `*.local.md`, so a copied folder never leaks one.
+Start from the [overlay template](https://github.com/DavidLadislau-dev/sargento-rea/blob/main/skills/sargento-rea/templates/sargento.local.example.md), or ask the Sargento to write one from its template. It has sections for your rules, machine, tools, workflow, stack and mission notes, so you can set your own limits, authorization rules and squad size. `.gitignore` covers `*.local.md`, so a copied folder never leaks one.
 
-Trust rule for the project file: it applies automatically only when you are inside a git work tree and git does not track the file. In any other case (not a git repository, or the file is tracked) it may have come from a cloned target, so the Sargento shows it to you and applies it only when you say so.
+Trust rule for the project file: it applies automatically only when the project folder is the top of its own git work tree (`git rev-parse --show-prefix` prints an empty line) and git does not track the file. In any other case (not a git repository, a folder nested inside another repository, a git error, or a tracked file) it may have come from a cloned target or an archive, so the Sargento shows it to you and applies it only when you say so.
 
 ## Contributing
 
@@ -92,10 +92,10 @@ A contributor is added here when their name appears in the `authors` of a merged
 
 **Projects the methods were learned from.** These recipes re-describe public methods in their own words and link back to the sources:
 
-- storytold, a set of clean-room projects: [indd-utils](https://github.com/storytold/indd-utils), [photocraft](https://github.com/storytold/photocraft), [photocraft-corpus](https://github.com/storytold/photocraft-corpus), [wordcraft](https://github.com/storytold/wordcraft), [cadcraft](https://github.com/storytold/cadcraft), [soundcraft](https://github.com/storytold/soundcraft) and [pdfcraft](https://github.com/storytold/pdfcraft).
+- storytold, a set of clean-room projects: [indd-utils](https://github.com/storytold/indd-utils), [photocraft](https://github.com/storytold/photocraft), [photocraft-corpus](https://github.com/storytold/photocraft-corpus), [wordcraft](https://github.com/storytold/wordcraft), [cadcraft](https://github.com/storytold/cadcraft), [soundcraft](https://github.com/storytold/soundcraft), [pdfcraft](https://github.com/storytold/pdfcraft) and [lightcraft](https://github.com/storytold/lightcraft).
 - [boykopovar/AnyPS5](https://github.com/boykopovar/AnyPS5).
 
-**AI models** that helped write this repository are credited through `Co-Authored-By` trailers in the commit history.
+**AI models.** v0.1 was built with Claude Code: Claude Opus 5.5 orchestrated and reviewed the work, and Claude Opus 5.5 and Claude Sonnet 5.5 wrote the commits. Contributors' commits carry their own AI-assistance trailers.
 
 ## Disclaimer
 

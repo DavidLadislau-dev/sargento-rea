@@ -80,7 +80,13 @@ class TemplateTests(unittest.TestCase):
             with self.subTest(heading=heading):
                 self.assertIn(heading, found)
                 examples = [ln for ln in found[heading] if ln.startswith("> Example: ")]
-                self.assertEqual(len(examples), 1, f"{heading} needs one '> Example:' line")
+                self.assertGreaterEqual(len(examples), 1, f"{heading} needs a '> Example:' line")
+        # SKILL.md ignores '> Example:' lines, so a quoted line without the
+        # prefix would turn into a live rule once the file is copied.
+        quoted = [ln for ln in text.split("\n") if ln.startswith(">")]
+        for line in quoted:
+            with self.subTest(line=line):
+                self.assertTrue(line.startswith("> Example: "))
 
     def test_mission_order_template(self):
         text = read(TEMPLATES / "mission-order.md")
@@ -113,6 +119,7 @@ class SkillTests(unittest.TestCase):
             "~/.claude/sargento.local.md",
             "<project>/.claude/sargento.local.md",
             "git rev-parse --is-inside-work-tree",
+            "git rev-parse --show-prefix",
             "git ls-files --error-unmatch .claude/sargento.local.md",
             "Reply in the user's language; files in this repo stay English.",
         ):

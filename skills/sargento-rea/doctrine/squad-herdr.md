@@ -23,8 +23,8 @@ herdr agent read <name> --source recent-unwrapped --lines 150
 
 In a folder Claude Code has not trusted yet, the recruit stops at the "trust this folder" prompt and `agent start` returns `agent_not_ready`.
 
-- **A folder the user owns or you created** (the study folder, the user's own repo and its worktrees): check the screen with `herdr agent read <name> --source visible`, answer `herdr agent send-keys <name> down enter`, then `herdr agent wait <name> --until idle --timeout 60000`.
-- **A cloned target or any third-party folder**, including worktrees of a cloned repo: ask the user first. Trusting the folder runs its `.claude/settings.json` hooks and starts the servers in its `.mcp.json`.
+- **A folder the user owns.** Own means you created it, or the user's current session already runs in it. If in doubt (a clone, or a folder holding `.claude/settings*.json` or `.mcp.json` you did not write), ask. For an owned folder, check the screen with `herdr agent read <name> --source visible`, answer `herdr agent send-keys <name> down enter`, then `herdr agent wait <name> --until idle --timeout 60000`.
+- **Any other folder**, such as a cloned target or a worktree of one: ask the user first. Trusting the folder runs its `.claude/settings.json` hooks and starts the servers in its `.mcp.json`.
 - Better: keep recruits in the study folder and let them read the target from `raw/` by path. Never use a folder under `raw/`, or any extracted third-party folder, as a recruit's `--cwd` or project root; that is where its `.claude/` files would be picked up.
 
 ## Auto mode
@@ -56,7 +56,7 @@ Do not start recruits without `--permission-mode auto` to dodge the block, and d
 - `-w <name>` creates `<repo>/.claude/worktrees/<name>` on branch `worktree-<name>`, from the current `HEAD`. Add `.claude/worktrees/` to the repo's `.gitignore` on `main`.
 - Review without changing into a recruit's worktree: use `git -C "<worktree>"` and the test tool's own directory flag (for example `uv run --directory "<worktree>"` or `npm --prefix "<worktree>"`).
   - Note for Windows: a `cd` into the worktree leaves a handle open that later blocks deleting the folder ("Device or resource busy").
-- Real personal or financial data a recruit processes stays in a git-ignored folder. You read only its structure and summaries, never the values.
+- Real personal or financial data in a recruit's work follows the personal-data rule in [SKILL.md](../SKILL.md).
 
 ## Dismissal
 

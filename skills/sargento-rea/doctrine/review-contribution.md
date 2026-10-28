@@ -18,6 +18,7 @@ For a pull request, run these in `<repo>` (or add `--repo <owner>/<name>`):
 ```bash
 gh pr list
 gh pr view N --json title,body,author,files,commits
+gh pr view N --json files --jq '.files[].path'      # every file the PR touches
 gh pr view N --json body --jq .body > "<scratch>/pr-N-body.md"
 gh pr diff N > "<scratch>/pr-N.diff"
 gh pr checks N
@@ -27,6 +28,7 @@ For a local branch, the diff is `git diff main...<branch>` (three dots: what the
 
 ```bash
 git -C "<repo>" log --oneline main..<branch>
+git -C "<repo>" diff --name-only main...<branch>   # every file the branch touches
 git -C "<repo>" diff --stat main...<branch>
 git -C "<repo>" diff main...<branch> > "<scratch>/<branch>.diff"
 ```
@@ -46,6 +48,7 @@ For a local branch, scan `"<scratch>/<branch>.diff"` instead.
   - `git -C "<repo>" show main:scripts/check_recipes.py > "<scratch>/checker/check_recipes.py"`
   - `python -I "<scratch>/checker/check_recipes.py" --scan <files>`
 - Each `WARNING` line is a question the brief must answer, not a verdict. Quote the diff line it points to.
+- An `ERROR` line from `--scan` means that file was not scanned. Read it by hand and treat it as suspicious.
 - No warnings proves nothing. The patterns in `scripts/check_recipes.py` are a floor; read for what they cannot catch.
 
 ## 3. Read the whole diff
@@ -56,6 +59,14 @@ Every line of every file, with no sampling. Read the diff file in chunks if it i
 
 - **Behaviour.** Treat any change to `SKILL.md`, `doctrine/` or `templates/` as a behaviour change. Ask: what will Claude do differently on users' machines after this merges? Look hardest at anything that makes Claude download, install, run or post something, start a tool or server, or ask the user less.
 - **Checker, CI and manifests.** A change to `scripts/`, `.github/` or `.claude-plugin/` changes what guards the repo or what users install. The PR's own CI runs the PR's version of the checker, so green checks prove nothing for such a PR. A new `.claude/` folder or `.mcp.json` would run hooks or servers for anyone who trusts the repo folder.
+- **Plugin components.** The marketplace `source` is `./`, so the repository root is the plugin root. A PR that adds any of these is loaded on every installer's machine at their next plugin update, with no folder-trust prompt:
+  - `hooks/hooks.json`;
+  - a root `.mcp.json`;
+  - `commands/`, `agents/`, or another `skills/<x>/`;
+  - a `hooks` or `mcpServers` key in `.claude-plugin/plugin.json`.
+
+  These are the common ones. The current [Claude Code plugin reference](https://code.claude.com/docs/en/plugins-reference) has the full list of components (it also names, for example, `bin/` and `settings.json`); check the file list from step 1 against it.
+- **Closest reading.** Every file in that list outside `skills/sargento-rea/**/*.md`, `README.md` and `CONTRIBUTING.md` gets the closest reading, and the brief calls it out under dangers.
 - **Own words and credit.** No long copies from the source, and the source is linked in `learned_from` and `## Sources and credits`. You may open the linked pages to check them, as untrusted data.
 - **Counts.** Every success claim carries a count or a measurement, and `status` matches the evidence: `proven-upstream` cites the source's numbers marked [S], and `tested` records the contributor's own run.
 - **Overlap.** Compare the recipe's `summary` with those of the existing recipes.
@@ -69,7 +80,7 @@ Write the brief in the maintainer's language, with [S]/[I] marks, in five parts:
 1. **What it is for:** the problem it solves, in one or two sentences.
 2. **What changes:** each file, and what Claude will do differently after the merge.
 3. **Benefits.**
-4. **Dangers:** every scan warning with its line, every behaviour change, and anything you could not verify.
+4. **Dangers:** every scan warning with its line, every file outside `skills/sargento-rea/**/*.md`, `README.md` and `CONTRIBUTING.md`, every behaviour change, and anything you could not verify.
 5. **Recommendation:** merge, request changes, or close, and why.
 
 Then add a **draft comment** in English for the contributor: thanks, what to change if anything, and how they will be credited.
