@@ -52,7 +52,7 @@ A study of an undocumented target produces claims faster than anyone can check t
 
 ## How the Sargento splits the work
 
-- **Field recruits** (from `rosetta-stone`, one per area). Order: for each candidate field, report a fact or an unknown in the study's ledger format, with its count, the set the count is over, and the script that produced it. Example lines: `F-012 [S] Field 0x18 is the page count. 171 of 171 pairs match. Source: reports/pairs.md` and `U-007 What sets the flag at 0x1c? Status: never varies (0 of 171 differ). Owner: pairs`.
+- **Field recruits** (from `rosetta-stone`, one per area). Order: for each candidate field, report a fact or an unknown in the study's ledger format, with its count, the set the count is over, and the script that produced it. Illustrative lines (the field and numbers are made up): `F-012 [S] Field 0x18 is the page count. 40 of 40 pairs match. Source: reports/pairs.md` and `U-007 What sets the flag at 0x1c? Status: never varies (0 of 40 differ). Owner: pairs`.
 - **The Sargento** merges the entries into `ledger/facts.md` and `ledger/unknowns.md`, so two recruits never write the same file. It sends back any entry without a count, any count without its set, and any exception without a note.
 - **Audit recruit** (optional, one per milestone). Order: take a random sample of ledger entries, re-run their counting scripts, and list the entries whose count differs. Take every constant in the new code and name the ledger entry it comes from, or report that there is none. It hands back two lists: entries that failed re-checking and constants without a fact. It never edits the ledger.
 - **Builder recruits** use the ledger as their only source about the target. When one needs something that is not in it, it files an unknown instead of guessing.
@@ -98,4 +98,4 @@ What the source project sets for itself, as information about the source and not
 
 ## Example
 
-From the source: the stroke-weight field of the attribute list was compared with the vendor export in every pair checked and matched 171 of 171. That is a fact with a count. A text-wrap setting stored as `false` on every item was filed under unknowns as `never varies`, with no field name. A colour field that matched 1,190 of 1,194 was written with its four misses and not rounded up [S].
+From the source: the stroke-weight field of the attribute list is listed in the source's evidence column ("IDML value equals INDD value") as 171 of 171; the source does not state the unit of the count. That is a fact with a count. A text-wrap setting stored as `false` on every item was filed under unknowns as `never varies`, with no field name. A colour field that matched 1,190 of 1,194 was written with its four misses and not rounded up [S].

@@ -80,7 +80,7 @@ Count, per field, the matches over the trustworthy pairs, and report the size of
 
 Published results from the source projects, marked [S]:
 
-- [S] A stroke-weight field matched the vendor value in 171 of 171 cases.
+- [S] A stroke-weight field is listed with an evidence count of 171 of 171 (the source does not state the unit).
 - [S] Page references matched in 7,523 of 7,523 on the trustworthy pairs, and index topics in 2,185 of 2,185 (2,223 in all pairs).
 - [S] The same-save rule matters: stories had identical text in 99.5 percent of the trustworthy pairs (18,509 of 18,610) against 78.5 percent of the pairs stale by a presence signal (2,000 of 2,547). The rule flagged 165 of 654 pairs.
 - [S] Picture twins: an Affinity reader was fitted against the thumbnails of 176 public documents. The collection later grew to 189 and the reader opens all of them. On 21 pinned documents the mean difference was 0 to 4.6 of 255.
@@ -117,4 +117,4 @@ What the source projects set for themselves, as information about the source and
 
 ## Example
 
-The source's INDD work, in outline: collect samples made by others (357 files, 240 with an export), join each object to the export through its id, drop stale pairs, then test each candidate field over every trustworthy pair. The stroke-weight field was tested this way and matched in 171 of 171 cases [S]; a text-wrap setting that was `false` on every item was recorded as "never varies" and not mapped.
+The source's INDD work, in outline: collect samples made by others (357 files, 240 with an export), join each object to the export through its id, drop stale pairs, then test each candidate field over every trustworthy pair, the method the source describes. The stroke-weight field is listed with a match count of 171 of 171 in the source's evidence column (the unit is not stated) [S]; a text-wrap setting that was `false` on every item was recorded as "never varies" and not mapped.
