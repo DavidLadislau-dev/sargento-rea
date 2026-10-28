@@ -3,3 +3,4 @@ docs/superpowers/
 .claude/worktrees/
 raw/
 __pycache__/
+.superpowers/

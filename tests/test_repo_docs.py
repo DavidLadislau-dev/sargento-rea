@@ -66,6 +66,7 @@ class WorkflowTests(unittest.TestCase):
         for ref in uses:
             self.assertRegex(ref, r"@[0-9a-f]{40}$")
         self.assertNotIn("secrets.", text)
+        self.assertRegex(text, r"with:\s*\n\s+persist-credentials: false")
 
     def test_workflow_runs_checker_and_tests(self):
         self.assertIn("python3 scripts/check_recipes.py", self.text)
