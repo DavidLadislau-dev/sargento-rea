@@ -15,6 +15,8 @@ learned_from:
     url: https://github.com/storytold/photocraft-corpus
   - name: storytold/wordcraft
     url: https://github.com/storytold/wordcraft
+  - name: storytold/lightcraft
+    url: https://github.com/storytold/lightcraft
 status: proven-upstream
 ---
 
@@ -84,8 +86,8 @@ Published results from the source projects, marked [S]:
 - [S] Page references matched in 7,523 of 7,523 on the trustworthy pairs, and index topics in 2,185 of 2,185 (2,223 in all pairs).
 - [S] The same-save rule matters: stories had identical text in 99.5 percent of the trustworthy pairs (18,509 of 18,610) against 78.5 percent of the pairs stale by a presence signal (2,000 of 2,547). The rule flagged 165 of 654 pairs.
 - [S] Picture twins: an Affinity reader was fitted against the thumbnails of 176 public documents. The collection later grew to 189 and the reader opens all of them. On 21 pinned documents the mean difference was 0 to 4.6 of 255.
-- [S] Compressed-versus-uncompressed twins: Nikon decoding tables recovered from the same scenes shot both ways were verified on about 45 files from about 35 camera bodies.
-- [S] A word processor checked against Word-made PDFs on a 251-document corpus saw its exact page counts rise from 201 to 229.
+- [S] Compressed-versus-uncompressed twins: the photocraft raw reader's notes say the Nikon decoding tables were recovered from the same scenes shot both ways for LightCraft, another storytold project, and verified there, in LightCraft, on about 45 files from about 35 camera bodies.
+- [S] Word-made PDFs as twins: wordcraft's changelog entry for one font-substitution rule (Times New Roman drawn in Liberation Serif where it is not installed) reports exact page counts rising from 201 to 229 on a 251-document corpus checked against Word-made PDFs. That shows the Word-PDF twin is usable as an oracle, not that this pairing method works.
 
 Your own run is proven when each fact you rely on has a count of this kind, and when you can say how many pairs were set aside as stale.
 
@@ -102,8 +104,9 @@ Method learned from the open-source work of the storytold team. All links are pe
 - Embedded thumbnail as oracle. [S] "comparing our render with the thumbnail every Affinity document embeds" (photocraft Affinity reader). https://github.com/storytold/photocraft/blob/1f7fc0f53696e54da79b95015abb37d7c22cdd1a/crates/affinity/README.md#L87-L96 and https://github.com/storytold/photocraft/blob/1f7fc0f53696e54da79b95015abb37d7c22cdd1a/crates/affinity/README.md#L112-L117
 - Same scene shot two ways, and candidates tried against the preview. https://github.com/storytold/photocraft/blob/1f7fc0f53696e54da79b95015abb37d7c22cdd1a/crates/raw/README.md#L37-L47
 - A camera-made JPEG inside every raw file. https://github.com/storytold/photocraft/blob/1f7fc0f53696e54da79b95015abb37d7c22cdd1a/crates/raw/README.md#L110-L111
+- Nikon tables recovered for LightCraft and verified there. [S] "recovered by black-box analysis of CC0 raw.pixls.us samples (the same scenes shot compressed and uncompressed) for LightCraft (storytold/lightcraft#86) and verified there" (photocraft raw reader). https://github.com/storytold/photocraft/blob/1f7fc0f53696e54da79b95015abb37d7c22cdd1a/crates/raw/README.md#L38-L40 and the merge commit of the LightCraft pull request it names: https://github.com/storytold/lightcraft/commit/92bd3aa688cd385be09dd40e065eabc2e4d95073
 - Composite stored in the file. [S] "A PSD saved with Maximize Compatibility holds a merged composite" (photocraft-corpus). https://github.com/storytold/photocraft-corpus/blob/c3abfc1c794409a71ade6a22283caab4ba4d2aa8/README.md#L57-L58
-- Word-made PDFs as oracle. https://github.com/storytold/wordcraft/blob/c4fafc215490a0186ee750454b1ce73a9823daed/docs/file-format-parity.md#L342-L342
+- Word-made PDFs as oracle, and the one font-substitution rule the page-count rise is reported under. https://github.com/storytold/wordcraft/blob/c4fafc215490a0186ee750454b1ce73a9823daed/docs/file-format-parity.md#L342-L342
 
 ## Notes
 

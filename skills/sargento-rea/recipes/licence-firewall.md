@@ -98,7 +98,7 @@ What the source projects set for themselves, as information about the source and
 - The pdfcraft project says copyleft tools run only as external oracle processes [S]. Its configuration says copyleft is never linked [S].
 - The pdfcraft project's own code carries `MIT OR Apache-2.0` [S], and its tiers follow from that. If you aim at another licence, your tiers change.
 - The wordcraft project calls its rule against vendor assets non-negotiable [S].
-- The rules cover only what the source projects chose for their own code. The recipe is a working method and not legal advice. Which licences you accept, and what you let your recruits read, are your decisions. Write them in your own rules for the study.
+- The rules cover only what the source projects chose for their own code. The recipe is a working method and not legal advice. Which licences you accept, and what you let your recruits read, are your decisions. Write them in your own rules for the build.
 
 ## Example
 

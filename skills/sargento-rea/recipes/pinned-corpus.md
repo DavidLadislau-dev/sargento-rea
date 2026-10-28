@@ -13,6 +13,8 @@ learned_from:
     url: https://github.com/storytold/indd-utils
   - name: storytold/photocraft-corpus
     url: https://github.com/storytold/photocraft-corpus
+  - name: storytold/wordcraft
+    url: https://github.com/storytold/wordcraft
 status: draft
 ---
 

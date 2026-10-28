@@ -61,6 +61,8 @@ A study of an undocumented target produces claims faster than anyone can check t
 
 What to count: facts with a "N of M" count, unknowns with a status, and code constants with a ledger entry. The method works when no fact is without a count, no unknown is without a status, and an audit finds no constant without a fact.
 
+This recipe is `proven-upstream` because the source's published attribute table shows the recipe's own test, "every fact has a count", in practice: every row has an entry in its evidence column, most of them "N of M", misses included.
+
 Published numbers from the source, marked [S]:
 
 - [S] The attribute table gives the evidence per field: 171 of 171 for a stroke-weight field, 778 of 778 for a miter limit, and the imperfect 1,190 of 1,194 and 78 of 82 for two colour fields.

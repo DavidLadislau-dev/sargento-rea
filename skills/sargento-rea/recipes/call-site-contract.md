@@ -3,7 +3,7 @@ id: call-site-contract
 title: Call-site contract
 summary: Infer what a library function takes and returns from how real programs call it, record what the callers cannot settle, and write the code from that contract instead of translating the disassembly.
 mission: build
-needs: [a program that calls the function and that you are allowed to read, a way to list its calls into the library, a place outside the repo for disassembly output]
+needs: [a program that calls the function and that you can read, a way to list its calls into the library, a place outside the repo for disassembly output]
 tools: [readelf, objdump, optional rea]
 authors: [DavidLadislau-dev]
 learned_from:
@@ -24,7 +24,7 @@ You need to reimplement a library function that nothing documents. The programs 
 
 ## What you need
 
-- A program (an executable or a module) that calls the function, in a form you may read. The method works on machine code of any kind, and the steps below show the System V AMD64 case that AnyPS5 targets.
+- A program (an executable or a module) that calls the function, in a form you can read. The method works on machine code of any kind, and the steps below show the System V AMD64 case that AnyPS5 targets.
 - A list of the program's imports with the address of every call to each one. AnyPS5 produces it with its own converter (step 2). Without one, any disassembler that lists cross-references to an import slot will do [I].
 - `readelf` and `objdump` from binutils, or a disassembler that loads program headers.
 - A folder outside the repo for disassembly and notes. Keep it out of anything you publish [I].

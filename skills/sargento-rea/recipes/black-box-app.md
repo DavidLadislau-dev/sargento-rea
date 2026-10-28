@@ -9,6 +9,8 @@ authors: [DavidLadislau-dev]
 learned_from:
   - name: storytold/photocraft-corpus
     url: https://github.com/storytold/photocraft-corpus
+  - name: storytold/photocraft
+    url: https://github.com/storytold/photocraft
   - name: storytold/wordcraft
     url: https://github.com/storytold/wordcraft
   - name: storytold/cadcraft
