@@ -1,0 +1,38 @@
+name: Problem with a recipe
+description: Report a wrong, unclear, unsupported or unsafe recipe.
+title: "Recipe problem: "
+body:
+  - type: input
+    id: recipe
+    attributes:
+      label: Recipe
+      description: The recipe id, for example rosetta-stone.
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of problem
+      options:
+        - A fact is wrong or out of date
+        - A step does not work
+        - It claims a result without a count
+        - It copies a source too closely or lacks credit
+        - It makes Claude do something it should not
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: What is wrong
+      description: Quote the line or section (at most 25 words) and say what you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Links, counts, or the steps you ran. Do not paste third-party files.
+    validations:
+      required: false

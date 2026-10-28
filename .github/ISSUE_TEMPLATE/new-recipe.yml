@@ -1,0 +1,46 @@
+name: New recipe idea
+description: Suggest a reverse-engineering method that should become a recipe.
+title: "Recipe idea: "
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Name of the method
+      description: A short name, like "Rosetta stone pairs".
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What it gets you
+      description: One or two sentences on what the method lets you do or prove.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Where the method comes from
+      description: Links to the project, document or work it was learned from. Commit permalinks are best.
+    validations:
+      required: true
+  - type: textarea
+    id: proof
+    attributes:
+      label: How would you know it worked
+      description: What you would count or measure, and any numbers the source published.
+    validations:
+      required: false
+  - type: textarea
+    id: overlap
+    attributes:
+      label: Overlap with existing recipes
+      description: Does it differ from the recipes in the README table? How?
+    validations:
+      required: false
+  - type: checkboxes
+    id: writing
+    attributes:
+      label: Who writes it
+      options:
+        - label: I plan to open a pull request for this recipe.
+          required: false
