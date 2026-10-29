@@ -95,7 +95,7 @@ A contributor is added here when their name appears in the `authors` of a merged
 - storytold, a set of clean-room projects: [indd-utils](https://github.com/storytold/indd-utils), [photocraft](https://github.com/storytold/photocraft), [photocraft-corpus](https://github.com/storytold/photocraft-corpus), [wordcraft](https://github.com/storytold/wordcraft), [cadcraft](https://github.com/storytold/cadcraft), [soundcraft](https://github.com/storytold/soundcraft), [pdfcraft](https://github.com/storytold/pdfcraft) and [lightcraft](https://github.com/storytold/lightcraft).
 - [boykopovar/AnyPS5](https://github.com/boykopovar/AnyPS5).
 
-**AI models.** v0.1 was built with Claude Code: Claude Opus 5.5 orchestrated and reviewed the work, and Claude Opus 5.5 and Claude Sonnet 5.5 wrote the commits. Contributors' commits carry their own AI-assistance trailers.
+**AI models.** v0.1 was built with Claude Code: Claude Opus 5.5 orchestrated and reviewed the work, and Claude Opus 5.5 and Claude Sonnet 5.5 wrote the commits; the pre-release hardening (the checker and a doctrine clarification) was done by Claude Opus 4.8. Contributors' commits carry their own AI-assistance trailers.
 
 ## Disclaimer
 
