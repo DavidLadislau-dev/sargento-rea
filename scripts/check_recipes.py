@@ -10,6 +10,7 @@ Exit code is 1 if any error was found, else 0. Warnings never fail the run.
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from dataclasses import dataclass
@@ -31,6 +32,13 @@ REQUIRED_HEADINGS = (
 MISSIONS = {"study", "build"}
 STATUSES = {"proven-upstream", "tested", "draft"}
 SCAN_GLOBS = ("skills/**/*.md", ".claude-plugin/*.json")
+# Directories that never ship: pruned from the whole-repo markdown walk so a
+# filesystem scan matches a fresh clone, and a working copy's local-only
+# scratch dirs (these mirror .gitignore) raise no false findings.
+PRUNE_DIRS = frozenset({
+    ".git", "docs", ".superpowers", ".claude", "raw",
+    "__pycache__", "node_modules", ".pytest_cache",
+})
 
 README_LINK_RE = re.compile(
     r"\(\.?/?skills/sargento-rea/recipes/([a-z0-9-]+)\.md(?:#[^)]*)?\)"
@@ -299,6 +307,23 @@ def scan_file(name: str) -> list[Finding]:
     return out + scan_suspicious(name, "\n".join(lines))
 
 
+def _iter_markdown(root: Path):
+    """Every `.md` file under root, with PRUNE_DIRS pruned from the walk."""
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [d for d in dirnames if d not in PRUNE_DIRS]
+        for name in filenames:
+            if name.endswith(".md"):
+                yield Path(dirpath) / name
+
+
+def _markdown_location_ok(rel: str) -> bool:
+    """A committed markdown file may live only in the skill tree, the two root
+    docs, or `.github/`. Anything else gets a human's eye before merge."""
+    if rel in ("README.md", "CONTRIBUTING.md"):
+        return True
+    return rel.startswith("skills/sargento-rea/") or rel.startswith(".github/")
+
+
 def check_repo(root: Path) -> list[Finding]:
     root = Path(root)
     findings: list[Finding] = []
@@ -334,18 +359,36 @@ def check_repo(root: Path) -> list[Finding]:
                 findings.append(Finding("README.md", "error",
                                         f"README lists '{rid}' but no recipe file exists"))
 
-    seen: set[Path] = set()
-    for pattern in SCAN_GLOBS:
-        for file in sorted(root.glob(pattern)):
-            if file in seen or file in undecodable or not file.is_file():
-                continue
-            seen.add(file)
-            text, problem = _read(file)
-            if problem:
-                findings.append(Finding(file.relative_to(root).as_posix(), "error",
-                                        problem.message))
-                continue
-            findings.extend(scan_suspicious(file.relative_to(root).as_posix(), text))
+    # Every markdown file in the repo, not just the skill tree: a file outside
+    # the allowed locations is an error (it escapes the recipe, README and
+    # template checks), and every markdown file is scanned for suspicious
+    # content so nothing hides by sitting in an unscanned folder.
+    for md in sorted(_iter_markdown(root)):
+        if not md.is_file():
+            continue
+        rel = md.relative_to(root).as_posix()
+        if not _markdown_location_ok(rel):
+            findings.append(Finding(
+                rel, "error",
+                "markdown outside the skill, README or CONTRIBUTING; "
+                "a recipe belongs in skills/sargento-rea/recipes/"))
+        if md in undecodable:
+            continue  # its UTF-8 error is already recorded
+        text, problem = _read(md)
+        if problem:
+            findings.append(Finding(rel, "error", problem.message))
+            continue
+        findings.extend(scan_suspicious(rel, text))
+
+    for file in sorted(root.glob(".claude-plugin/*.json")):
+        if not file.is_file():
+            continue
+        rel = file.relative_to(root).as_posix()
+        text, problem = _read(file)
+        if problem:
+            findings.append(Finding(rel, "error", problem.message))
+            continue
+        findings.extend(scan_suspicious(rel, text))
     return findings
 
 
