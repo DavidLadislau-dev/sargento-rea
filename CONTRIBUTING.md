@@ -56,4 +56,4 @@ python scripts/check_recipes.py
 python -m unittest discover -s tests -v
 ```
 
-The first command checks every recipe: frontmatter, `id`, required headings in order, a matching README row, and a scan for suspicious content. It prints warnings for a reviewer to read; read them. The second runs the tests. The same two steps run in GitHub Actions on every pull request.
+The first command checks every recipe: frontmatter, `id`, required headings in order, a matching README row, and a scan for suspicious content. It prints warnings for a reviewer to read; read them. It also asks git for every file the repository would commit, so run it from a clone. The whole repository ships as the plugin, so a file outside the known layout fails the check, whatever its folder or type; a pull request that needs a new kind of file says so, and the maintainer extends the list. The second command runs the tests. The same two steps run in GitHub Actions on every pull request.

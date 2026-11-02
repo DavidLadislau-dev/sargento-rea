@@ -10,8 +10,8 @@ Exit code is 1 if any error was found, else 0. Warnings never fail the run.
 from __future__ import annotations
 
 import argparse
-import os
 import re
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -32,13 +32,21 @@ REQUIRED_HEADINGS = (
 MISSIONS = {"study", "build"}
 STATUSES = {"proven-upstream", "tested", "draft"}
 SCAN_GLOBS = ("skills/**/*.md", ".claude-plugin/*.json")
-# Directories that never ship: pruned from the whole-repo markdown walk so a
-# filesystem scan matches a fresh clone, and a working copy's local-only
-# scratch dirs (these mirror .gitignore) raise no false findings.
-PRUNE_DIRS = frozenset({
-    ".git", "docs", ".superpowers", ".claude", "raw",
-    "__pycache__", "node_modules", ".pytest_cache",
+# The repository root is the plugin root (marketplace `source: "./"`), so every
+# file in the repo ships to everyone who installs the plugin. These paths are
+# the known layout; any other file, whatever its type, is an error until a
+# maintainer has reviewed it and added it here. hooks/hooks.json or .mcp.json,
+# for example, would run on the machines of people who install the plugin.
+ALLOWED_FILES = frozenset({
+    ".gitignore", "LICENSE", "README.md", "CONTRIBUTING.md",
+    ".claude-plugin/plugin.json", ".claude-plugin/marketplace.json",
 })
+ALLOWED_PATTERNS = (
+    re.compile(r"skills/sargento-rea/.+\.md"),
+    re.compile(r"\.github/.+"),
+    re.compile(r"(scripts|tests)/[^/]+\.py"),
+)
+SCANNED_RE = re.compile(r".+\.md|\.claude-plugin/[^/]+\.json")
 
 README_LINK_RE = re.compile(
     r"\(\.?/?skills/sargento-rea/recipes/([a-z0-9-]+)\.md(?:#[^)]*)?\)"
@@ -307,21 +315,32 @@ def scan_file(name: str) -> list[Finding]:
     return out + scan_suspicious(name, "\n".join(lines))
 
 
-def _iter_markdown(root: Path):
-    """Every `.md` file under root, with PRUNE_DIRS pruned from the walk."""
-    for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in dirnames if d not in PRUNE_DIRS]
-        for name in filenames:
-            if name.endswith(".md"):
-                yield Path(dirpath) / name
+def _git(root: Path, *args: str) -> str | None:
+    try:
+        done = subprocess.run(["git", "-C", str(root), *args],
+                              capture_output=True, check=True)
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    return done.stdout.decode("utf-8", errors="surrogateescape")
 
 
-def _markdown_location_ok(rel: str) -> bool:
-    """A committed markdown file may live only in the skill tree, the two root
-    docs, or `.github/`. Anything else gets a human's eye before merge."""
-    if rel in ("README.md", "CONTRIBUTING.md"):
-        return True
-    return rel.startswith("skills/sargento-rea/") or rel.startswith(".github/")
+def _repo_files(root: Path) -> list[str] | None:
+    """Repo-relative POSIX paths of every file that ships or could be committed:
+    tracked files, even ones .gitignore matches (a pull request can force-add
+    them), plus untracked files .gitignore does not exclude. Git decides, not
+    folder names, so a working copy's ignored scratch raises nothing and a
+    committed file is checked wherever it sits. None if root is not the top of
+    a git work tree."""
+    if _git(root, "rev-parse", "--show-prefix") != "\n":
+        return None
+    out = _git(root, "ls-files", "-z", "--cached", "--others", "--exclude-standard")
+    if out is None:
+        return None
+    return sorted({p for p in out.split("\0") if p})
+
+
+def _location_ok(rel: str) -> bool:
+    return rel in ALLOWED_FILES or any(p.fullmatch(rel) for p in ALLOWED_PATTERNS)
 
 
 def check_repo(root: Path) -> list[Finding]:
@@ -359,32 +378,32 @@ def check_repo(root: Path) -> list[Finding]:
                 findings.append(Finding("README.md", "error",
                                         f"README lists '{rid}' but no recipe file exists"))
 
-    # Every markdown file in the repo, not just the skill tree: a file outside
-    # the allowed locations is an error (it escapes the recipe, README and
-    # template checks), and every markdown file is scanned for suspicious
-    # content so nothing hides by sitting in an unscanned folder.
-    for md in sorted(_iter_markdown(root)):
-        if not md.is_file():
-            continue
-        rel = md.relative_to(root).as_posix()
-        if not _markdown_location_ok(rel):
+    # Every file in the repo, not just the skill tree: a file outside the known
+    # layout is an error (it escapes the recipe, README and template checks,
+    # and it ships with the plugin), and every markdown file and manifest is
+    # scanned for suspicious content so nothing hides in an unscanned folder.
+    files = _repo_files(root)
+    if files is None:
+        findings.append(Finding(
+            ".", "error",
+            "not the top of a git work tree; the checker asks git which files "
+            "the repo ships, so run it from the root of a clone"))
+        files = []
+    undecodable_rel = {p.relative_to(root).as_posix() for p in undecodable}
+    for rel in files:
+        if not _location_ok(rel):
             findings.append(Finding(
                 rel, "error",
                 "markdown outside the skill, README or CONTRIBUTING; "
-                "a recipe belongs in skills/sargento-rea/recipes/"))
-        if md in undecodable:
-            continue  # its UTF-8 error is already recorded
-        text, problem = _read(md)
-        if problem:
-            findings.append(Finding(rel, "error", problem.message))
-            continue
-        findings.extend(scan_suspicious(rel, text))
-
-    for file in sorted(root.glob(".claude-plugin/*.json")):
-        if not file.is_file():
-            continue
-        rel = file.relative_to(root).as_posix()
-        text, problem = _read(file)
+                "a recipe belongs in skills/sargento-rea/recipes/"
+                if rel.endswith(".md") else
+                "file outside the plugin's known layout; it would ship to "
+                "everyone who installs the plugin, so a maintainer must review "
+                "it and add it to the allowlist in scripts/check_recipes.py"))
+        path = root / rel
+        if not SCANNED_RE.fullmatch(rel) or not path.is_file() or rel in undecodable_rel:
+            continue  # an undecodable recipe's UTF-8 error is already recorded
+        text, problem = _read(path)
         if problem:
             findings.append(Finding(rel, "error", problem.message))
             continue
