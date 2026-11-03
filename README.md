@@ -90,6 +90,10 @@ Recipes are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md): one recipe or chan
 
 A contributor is added here when their name appears in the `authors` of a merged recipe, and the pull request that merges the recipe adds the line.
 
+**Security reports:**
+
+- Matt Abate ([mattabate](https://github.com/mattabate)) reported privately that the recipe checker skipped some folders at any depth, so a file there missed the scan. Fixed in [#3](https://github.com/DavidLadislau-dev/sargento-rea/pull/3).
+
 **Projects the methods were learned from.** These recipes re-describe public methods in their own words and link back to the sources:
 
 - storytold, a set of clean-room projects: [indd-utils](https://github.com/storytold/indd-utils), [photocraft](https://github.com/storytold/photocraft), [photocraft-corpus](https://github.com/storytold/photocraft-corpus), [wordcraft](https://github.com/storytold/wordcraft), [cadcraft](https://github.com/storytold/cadcraft), [soundcraft](https://github.com/storytold/soundcraft), [pdfcraft](https://github.com/storytold/pdfcraft) and [lightcraft](https://github.com/storytold/lightcraft).
